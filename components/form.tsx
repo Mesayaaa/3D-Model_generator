@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import type * as z from "zod"
+import type { z } from "zod"
 import { Form as UIForm } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { ImageIcon, SlidersHorizontal, ArrowUp } from "lucide-react"
@@ -64,6 +64,8 @@ export default function Form({ isLoading, onSubmit, onOpenOptions }: FormProps) 
       files = files.slice(0, allowedNewImages)
 
       if (files.length === 0) return
+    } else {
+      setError(null)
     }
 
     const newPreviewUrls = files.map((file) => URL.createObjectURL(file))
@@ -79,15 +81,20 @@ export default function Form({ isLoading, onSubmit, onOpenOptions }: FormProps) 
     newImages.splice(index, 1)
 
     const newPreviewUrls = [...previewUrls]
-    URL.revokeObjectURL(newPreviewUrls[index])
+    if (newPreviewUrls[index]) {
+      URL.revokeObjectURL(newPreviewUrls[index])
+    }
     newPreviewUrls.splice(index, 1)
 
     setPreviewUrls(newPreviewUrls)
     form.setValue("images", newImages)
+    setError(null)
   }
 
   const triggerFileInput = () => {
-    fileInputRef.current?.click()
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
   }
 
   // Drag and drop handlers
@@ -138,7 +145,9 @@ export default function Form({ isLoading, onSubmit, onOpenOptions }: FormProps) 
     if (e.key === "Enter") {
       if (!isMobile && !e.shiftKey) {
         e.preventDefault()
-        formRef.current?.requestSubmit()
+        if (formRef.current) {
+          formRef.current.requestSubmit()
+        }
       }
     }
   }
