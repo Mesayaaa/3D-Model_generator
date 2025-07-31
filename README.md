@@ -14,7 +14,7 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 Your project is live at:
 
-**[https://vercel.com/mesayachristopher4-2397s-projects/v0-3-d-model-generator-powered-by](https://vercel.com/mesayachristopher4-2397s-projects/3-d-model-generator)**
+**[https://vercel.com/mesayachristopher4-2397s-projects/3-d-model-generator](https://vercel.com/mesayachristopher4-2397s-projects/3-d-model-generator)**
 
 ## Build your app
 
