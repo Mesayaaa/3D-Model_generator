@@ -1,11 +1,16 @@
 import type React from "react"
-import { Geist } from "next/font/google"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import "./globals.css"
+import { ThemeProvider } from "@/components/theme-provider"
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-})
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "3D Model Generator",
+  description: "Generate 3D models using AI with Hyper3D Rodin",
+    generator: 'v0.dev'
+}
 
 export default function RootLayout({
   children,
@@ -13,16 +18,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={geist.className}>
-      <head>
-        <title>3D Model Generator</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </head>
-      <body className="bg-black text-white">{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
-
-export const metadata = {
-      generator: 'v0.dev'
-    };

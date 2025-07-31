@@ -1,36 +1,36 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url)
-    const fileUrl = url.searchParams.get("url")
+    const { searchParams } = new URL(request.url)
+    const url = searchParams.get("url")
 
-    if (!fileUrl) {
+    if (!url) {
       return NextResponse.json({ error: "Missing url parameter" }, { status: 400 })
     }
 
-    // Fetch the file from the original URL
-    const response = await fetch(fileUrl)
+    const response = await fetch(url)
 
     if (!response.ok) {
-      return NextResponse.json({ error: `Failed to fetch file: ${response.status}` }, { status: response.status })
+      throw new Error(`Failed to fetch file: ${response.status} ${response.statusText}`)
     }
 
-    // Get the file content and content type
-    const fileContent = await response.arrayBuffer()
-    const contentType = response.headers.get("content-type") || "application/octet-stream"
+    const buffer = await response.arrayBuffer()
 
-    // Create a new response with the file content and appropriate headers
-    return new NextResponse(fileContent, {
+    return new NextResponse(buffer, {
       headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": `attachment; filename="${fileUrl.split("/").pop()}"`,
+        "Content-Type": response.headers.get("Content-Type") || "application/octet-stream",
+        "Content-Length": buffer.byteLength.toString(),
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "no-cache",
+        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Headers": "Content-Type",
       },
     })
   } catch (error) {
-    console.error("Error in proxy download route:", error)
-    return NextResponse.json({ error: "Failed to proxy download" }, { status: 500 })
+    console.error("Error in proxy-download route:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 },
+    )
   }
 }

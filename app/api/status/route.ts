@@ -1,37 +1,38 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
-const API_KEY = "vibecoding" // Public API key
-
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { subscription_key } = body
+    const { searchParams } = new URL(request.url)
+    const subscriptionKey = searchParams.get("subscription_key")
 
-    if (!subscription_key) {
-      return NextResponse.json({ error: "Missing subscription_key" }, { status: 400 })
+    if (!subscriptionKey) {
+      return NextResponse.json({ error: "Missing subscription_key parameter" }, { status: 400 })
     }
 
-    const response = await fetch("https://hyperhuman.deemos.com/api/v2/status", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `https://hyperhuman.deemos.com/api/v2/rodin/status?subscription_key=${subscriptionKey}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env.RODIN_API_KEY}`,
+          "Content-Type": "application/json",
+        },
       },
-      body: JSON.stringify({ subscription_key }),
-    })
+    )
 
     if (!response.ok) {
       const errorText = await response.text()
-      return NextResponse.json(
-        { error: `Status check failed: ${response.status}`, details: errorText },
-        { status: response.status },
-      )
+      console.error("Status API error:", errorText)
+      throw new Error(`Status API error: ${response.status} ${response.statusText}`)
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Error in Status API route:", error)
-    return NextResponse.json({ error: "Failed to check status" }, { status: 500 })
+    console.error("Error in status route:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 },
+    )
   }
 }
